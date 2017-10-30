@@ -7,7 +7,7 @@ our $VERSION = '0.1.0';
 
 sub register {
   my ($self, $app, $conf) = @_;
-  $conf = $app->config->{dbi_config} if($app->config->{dbi_config});
+  $conf = {%{$conf},%{$app->config->{dbi_config}}} if($app->config->{dbi_config});
   my $dbi_class = delete $conf->{dbi_class} || 'DBIx::Custom';
   my $model_namespace = delete $conf->{model_namespace} if($conf->{model_namespace});
   
