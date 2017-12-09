@@ -2,7 +2,7 @@ package Mojolicious::Plugin::DBIxCustom;
 use Mojo::Base 'Mojolicious::Plugin';
 use Mojo::Loader qw/load_class/;
 
-our $VERSION = '0.1.0';
+our $VERSION = '0.1.1';
 
 
 sub register {
