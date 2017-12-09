@@ -38,10 +38,6 @@ sub register {
 
 Mojolicious::Plugin::DBIxCustom - 链接DBIx::Custom到Mojolicious的插件
 
-=head1 VERSION
-
-Version 0.1.0
-
 
 =head1 SYNOPSIS
 
