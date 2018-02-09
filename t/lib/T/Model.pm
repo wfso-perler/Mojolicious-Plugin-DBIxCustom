@@ -2,6 +2,6 @@ package T::Model;
 use strict;
 use warnings;
 
-use DBIx::Custom::Model -base;
+use Mojolicious::DBIxCustom::Model -base;
 
 1;
