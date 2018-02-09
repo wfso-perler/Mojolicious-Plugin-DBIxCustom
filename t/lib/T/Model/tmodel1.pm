@@ -11,9 +11,10 @@ has columns => sub{
   };
 
 
-has ctime=>"create_time";
-has mtime=>"update_time";
-has primary_key=>"test_id";
+has ctime => "create_time";
+has mtime => "update_time";
+has primary_key => "test_id";
+has sdel => "is_deleted";
 
 
 1;

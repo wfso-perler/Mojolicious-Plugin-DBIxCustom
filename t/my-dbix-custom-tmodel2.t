@@ -73,21 +73,33 @@ $tm2->sremove_by_id($tt->{test_id});
 
 my $t5 = $tm2->get_by_id($tt->{test_id});
 
-ok($t5->{$tm2->name}->{is_deleted} eq "1", "sremove_by_id" . Dumper($t5));
+ok(!defined $t5->{$tm2->name}, "sremove_by_id" . Dumper($t5));
+
+$tt = $tm2->create({
+    test_name  => "a",
+    test_intro => "b",
+    test_id    => 2
+  }
+)->{$tm2->name};
 
 $tm2->sremove($tt->{test_id}, 6);
 
 my $t6 = $tm2->get_by_id($tt->{test_id});
 
-ok($t6->{$tm2->name}->{is_deleted} eq "6", "sremove by id " . Dumper($t6));
+ok(!defined $t6->{$tm2->name}, "sremove by id " . Dumper($t6));
+
+$tt = $tm2->create({
+    test_name  => "a",
+    test_intro => "b",
+    test_id    => 3
+  }
+)->{$tm2->name};
 
 $tm2->sremove($tt, 7);
 
 my $t7 = $tm2->get_by_test_name($tt->{test_name});
 
-ok($t7->{$tm2->name}->{is_deleted} eq "7", "sremove by obj " . Dumper($t7));
-
-ok($t7->{$tm2->name} eq $t7->{list}->[0], "sremove by obj " . Dumper($t7));
+ok(!defined $t7->{$tm2->name}, "sremove by obj " . Dumper($t7));
 
 done_testing;
 

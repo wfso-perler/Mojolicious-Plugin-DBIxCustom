@@ -5,6 +5,8 @@ use DBIx::Custom::Model -base;
 use utf8;
 use Carp qw/confess cluck/;
 
+has 'sdel';
+
 
 sub last_id{
   my $self = shift;
@@ -23,6 +25,12 @@ sub last_id{
 sub create{
   my $self = shift;
   my $param = shift;
+  
+  ## 添加软删除标记
+  my $sdel = $self->sdel;
+  if($sdel && !exists($param->{$sdel})){
+    $param->{$sdel} = 0;
+  }
   
   ## 过滤param ，保证只有表中有的字段才会出现在insert语句中
   my $mapper = $self->dbi->mapper(param => $param, pass => $self->columns);
@@ -55,7 +63,7 @@ sub create{
 ## list , update语句修改的数据对象，修改前的值
 ## object ,update语句修改的数据对象中的第一个，修改前的值
 ## param ,参数原样返回
-## where ,执行update时的where条件
+## where ,执行update时的where条件 hashref
 sub edit{
   my $self = shift;
   my $param = shift;
@@ -83,6 +91,12 @@ sub edit{
   ## 合并where条件
   $where ||= {};
   $where = {%w, %{$where}};
+  
+  ## 添加软删除标记
+  my $sdel = $self->sdel;
+  if($sdel && !exists($where->{$sdel})){
+    $where->{$sdel} = 0;
+  }
   
   ## 过滤param中的字段，保证只有表中有的字段才会出现在update语句中
   my $mapper = $self->dbi->mapper(param => $param, pass => $self->columns);
@@ -172,6 +186,12 @@ sub remove{
     return undef;
   }
   
+  ## 添加软删除标记
+  my $sdel = $self->sdel;
+  if($sdel && !exists($where->{$sdel})){
+    $where->{$sdel} = 0;
+  }
+  
   ## 查询需要出将要删除的内容
   my $list = $self->select(where => $where)->all;
   
@@ -209,6 +229,11 @@ sub remove_by_id{
     $where->{$pk} = shift(@ids);
   }
   
+  ## 添加软删除标记
+  my $sdel = $self->sdel;
+  if($sdel && !exists($where->{$sdel})){
+    $where->{$sdel} = 0;
+  }
   
   ## 查询需要出将要删除的内容
   my $object = $self->select(where => $where)->one;
@@ -267,12 +292,22 @@ sub sremove{
   
   my $flag = shift || 1;
   
-  ## 查询需要出将要删除的内容
-  my $list = $self->select(where => $where)->all;
+  ## 添加软删除标记
+  my $sdel = $self->sdel;
+  if($sdel && !exists($where->{$sdel})){
+    $where->{$sdel} = 0;
+  }
   
-  ## 执行软删除操作
-  my $rows = $self->update({is_deleted => $flag}, where => $where);
-  return {rows => $rows, list => $list, object => $list->[0], where => $where};
+  if($sdel){
+    ## 查询需要出将要删除的内容
+    my $list = $self->select(where => $where)->all;
+  
+    ## 执行软删除操作
+    my $rows = $self->update({$sdel => $flag}, where => $where);
+    return {rows => $rows, list => $list, object => $list->[0], where => $where};
+  }else{
+    cluck "dont support sremove";
+  }
 }
 
 
@@ -308,12 +343,22 @@ sub sremove_by_id{
   my $flag = $t ? shift : shift(@ids);
   $flag ||= 1;
   
-  ## 查询需要出将要删除的内容
-  my $object = $self->select(where => $where)->one;
+  ## 添加软删除标记
+  my $sdel = $self->sdel;
+  if($sdel && !exists($where->{$sdel})){
+    $where->{$sdel} = 0;
+  }
   
-  ## 执行软件删除
-  my $rows = $self->update({is_deleted => $flag}, where => $where);
-  return {rows => $rows, object => $object, where => $where};
+  if($sdel){
+    ## 查询需要出将要删除的内容
+    my $object = $self->select(where => $where)->one;
+    
+    ## 执行软件删除
+    my $rows = $self->update({$sdel => $flag}, where => $where);
+    return {rows => $rows, object => $object, where => $where};
+  }else{
+    cluck "dont support sremove";
+  }
 }
 
 ## 允许的参数类型如下：
@@ -355,6 +400,12 @@ sub get_by_id{
     $where->{$pk} = shift(@{$ids});
   }
   
+  ## 添加软删除标记
+  my $sdel = $self->sdel;
+  if($sdel && !exists($where->{$sdel})){
+    $where->{$sdel} = 0;
+  }
+  
   ## 执行查询操作
   if(defined $ids){
     my $obj = $self->select($fields ? $fields : (), where => $where)->one;
@@ -382,6 +433,13 @@ sub AUTOLOAD{
       $columns = shift;
     }
     my $where = {$wk => shift};
+    
+    ## 添加软删除标记
+    my $sdel = $self->sdel;
+    if($sdel && !exists($where->{$sdel})){
+      $where->{$sdel} = 0;
+    }
+    
     my $list = $self->select($columns ? $columns : (), where => $where, @_)->all;
     return {$self->name => $list->[0], object => $list->[0], list => $list, where => $where};
   }
