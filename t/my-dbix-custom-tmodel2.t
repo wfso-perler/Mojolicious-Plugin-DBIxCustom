@@ -101,6 +101,24 @@ my $t7 = $tm2->get_by_test_name($tt->{test_name});
 
 ok(!defined $t7->{$tm2->name}, "sremove by obj " . Dumper($t7));
 
+
+$tt = $tm2->create({
+    test_name  => "a",
+    test_intro => "b",
+    test_id    => 4
+  }
+)->{$tm2->name};
+
+
+$tt = $tm2->create({
+    test_name  => "a",
+    test_intro => "b",
+    test_id    => 5
+  }
+)->{$tm2->name};
+
+ok($tm2->count_by_test_name("a") eq "2","count_by_*    ".$tm2->count_by_test_name("a"));
+
 done_testing;
 
 

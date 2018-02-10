@@ -301,7 +301,7 @@ sub sremove{
   if($sdel){
     ## 查询需要出将要删除的内容
     my $list = $self->select(where => $where)->all;
-  
+    
     ## 执行软删除操作
     my $rows = $self->update({$sdel => $flag}, where => $where);
     return {rows => $rows, list => $list, object => $list->[0], where => $where};
@@ -419,9 +419,12 @@ sub AUTOLOAD{
   my $self = shift;
   my ($package, $method) = our $AUTOLOAD =~ /^(.+)::(.+)$/;
   
-  
-  ## 返回值为 hashref
-  ## rows 影响了多少行
+  ## --------参数支持--------
+  ## columns 可选
+  ## field 值 必选
+  ## 后面可以跟其他select方法可接收的参数，如：append等
+  ## --------返回值为 hashref--------
+  ## rows 查到了多少行
   ## 表名  查询得到的数据对象的第一条
   ## object ,查询得到的数据对象的第一条
   ## list , 查询得到的数据对象的列表
@@ -441,7 +444,37 @@ sub AUTOLOAD{
     }
     
     my $list = $self->select($columns ? $columns : (), where => $where, @_)->all;
-    return {$self->name => $list->[0], object => $list->[0], list => $list, where => $where};
+    return {
+      rows        => scalar(@{$list}),
+      $self->name => $list->[0],
+      object      => $list->[0],
+      list        => $list,
+      where       => $where
+    };
+  }
+  
+  
+  ## --------参数支持--------
+  ## columns 可选
+  ## field 值 必选
+  ## 后面可以跟其他select方法可接收的参数，如：append等
+  ## --------返回值为 整数--------
+  ## 共计多少行
+  if($method =~ /^count_by_(.+)$/){
+    my $wk = $1;
+    my ($columns);
+    if(ref $_[0]){
+      $columns = shift;
+    }
+    my $where = {$wk => shift};
+    
+    ## 添加软删除标记
+    my $sdel = $self->sdel;
+    if($sdel && !exists($where->{$sdel})){
+      $where->{$sdel} = 0;
+    }
+    
+    return $self->count($columns ? $columns : (), where => $where, @_);
   }
   
   ## 与remove 方法的返回值格式相同
