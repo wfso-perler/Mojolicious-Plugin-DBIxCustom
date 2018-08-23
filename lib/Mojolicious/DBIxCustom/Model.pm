@@ -51,7 +51,7 @@ sub create{
     $object = $object->{$self->name} if($object && $object->{$self->name});
   }else{
     my @pa = ();
-    for(@{$pk}){
+    foreach(@{$pk}){
       push(@pa, $obj->{$_});
     }
     $object = $self->get_by_id(@pa);
@@ -79,7 +79,7 @@ sub edit{
   ## 如果param中有主键信息存在，则把param中的主键合并到where中
   ## 为了保证被修改的字段中不包含主键，需要把主键从param中删除
   if(ref $pk){
-    for(@{$pk}){
+    foreach(@{$pk}){
       $have_pk &&= exists($param->{$_});
       $w{$_} = delete $param->{$_} if(exists($param->{$_}));
     }
@@ -116,7 +116,7 @@ sub edit{
   
   ## 把主键还原给param 和obj,方便service层使用
   if(ref $pk){
-    for(@{$pk}){
+    foreach(@{$pk}){
       if(exists($where->{$_})){
         $obj->{$_} = $where->{$_};
         $param->{$_} = $where->{$_};
@@ -164,7 +164,7 @@ sub remove{
         unshift(@_, $where);
         if(@{$pk} <= @_){
           $where = {};
-          for(@{$pk}){
+          foreach(@{$pk}){
             $where->{$_} = shift;
           }
         }
@@ -178,7 +178,7 @@ sub remove{
     my @ids = @{$where};
     if(@{$pk} <= @ids){
       $where = {};
-      for(@{$pk}){
+      foreach(@{$pk}){
         $where->{$_} = shift(@ids);
       }
     }
@@ -224,7 +224,7 @@ sub remove_by_id{
   my $pk = $self->primary_key;
   my $where = {};
   if(ref $pk eq "ARRAY" && @ids >= @{$pk}){
-    for(@{$pk}){
+    foreach(@{$pk}){
       $where->{$_} = shift(@ids);
     }
   }elsif(ref $pk eq "ARRAY"){
@@ -270,7 +270,7 @@ sub sremove{
         unshift(@_, $where);
         if(@{$pk} <= @_){
           $where = {};
-          for(@{$pk}){
+          foreach(@{$pk}){
             $where->{$_} = shift;
           }
         }
@@ -284,7 +284,7 @@ sub sremove{
     my @ids = @{$where};
     if(@{$pk} <= @ids){
       $where = {};
-      for(@{$pk}){
+      foreach(@{$pk}){
         $where->{$_} = shift(@ids);
       }
     }
@@ -332,7 +332,7 @@ sub sremove_by_id{
   my $pk = $self->primary_key;
   my $where = {};
   if(ref $pk eq "ARRAY" && @ids >= @{$pk}){
-    for(@{$pk}){
+    foreach(@{$pk}){
       $where->{$_} = shift(@ids);
     }
   }elsif(ref $pk eq "ARRAY"){
@@ -385,7 +385,7 @@ sub get_by_id{
   my $pk = $self->primary_key;
   my $where = {};
   if(ref $pk && @{$pk} <= @{$ids}){
-    for(@{$pk}){
+    foreach(@{$pk}){
       $where->{$_} = shift(@{$ids});
     }
   }elsif(ref $pk){
